@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/314159DD/dusk/releases/latest"><img src="https://img.shields.io/badge/release-v0.1.0-8FA2FF?style=flat-square" alt="Release"></a>
+  <a href="https://github.com/314159DD/dusk/releases/latest"><img src="https://img.shields.io/badge/release-v0.1.1-8FA2FF?style=flat-square" alt="Release"></a>
   <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-2B3A8C?style=flat-square" alt="Windows 10 and 11">
   <img src="https://img.shields.io/badge/exe-223%20KB-2B3A8C?style=flat-square" alt="223 KB">
   <img src="https://img.shields.io/badge/idle%20RAM-2%20MB-2B3A8C?style=flat-square" alt="2 MB idle">
@@ -37,6 +37,7 @@ Three different monitors never look the same at night. Dusk gives each one its o
 - **Hotkeys first.** Change the screen under your mouse without opening anything.
 - **Three presets per screen.** Press the disk, pick 1, 2 or 3.
 - **Blue light filter.** One click per screen, with its own stored temperature.
+- **Quiet readout.** A small popup in the top right corner of the changed screen shows the new values for a second, then goes away.
 - **Notes.** Double-click beside a monitor name to label it.
 - **Tiny.** One native exe, about 2 MB of memory while idle, nothing to install, zero network calls.
 
