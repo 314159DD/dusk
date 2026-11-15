@@ -905,14 +905,15 @@ void uiFlash(int mi, const wchar_t* name, const wchar_t* value)
         g.SetTextRenderingHint(TextRenderingHintAntiAlias);
         g.SetPixelOffsetMode(PixelOffsetModeHalf);
         g.ScaleTransform(s, s);
-        fillRR(g, C_CHROME, 8, 8, cw, ch, 16);
+        fillRR(g, C_PAPER, 8, 8, cw, ch, 16);
         edgeRR(g, 8, 8, cw, ch, 16);
         float ty = 8 + 1 + 12;
         txt(g, name, O.F.r13, C_INK, 8 + 1 + 18, ty, nameW + 10, 17, StringAlignmentNear);
-        txt(g, value, O.F.m13, C_SOFT, 8 + 1 + 18 + nameW + 14, ty, valW + 10, 17, StringAlignmentNear);
+        txt(g, value, O.F.m13, C_INK, 8 + 1 + 18 + nameW + 14, ty, valW + 10, 17, StringAlignmentNear);
     }
-    O.baseX = wk.left + ((wk.right - wk.left) - O.W) / 2;
-    O.baseY = wk.bottom - O.H - (wk.bottom - wk.top) / 12;
+    int inset = (int)(16 * s);
+    O.baseX = wk.right - O.W - inset;
+    O.baseY = wk.top + inset;
     osdPresent(255);
     ShowWindow(O.hwnd, SW_SHOWNOACTIVATE);
     SetTimer(O.hwnd, 1, 1200, NULL);
