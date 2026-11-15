@@ -5,8 +5,7 @@
 <h1 align="center">Dusk</h1>
 
 <p align="center">
-  <b>Colour temperature and brightness for Windows, per monitor.</b><br>
-  Set it. It stays.
+  <b>Colour temperature and brightness for Windows, per monitor.</b>
 </p>
 
 <p align="center">
@@ -25,7 +24,7 @@
 
 ---
 
-Three different monitors never look the same at night. Dusk gives each one its own warmth and brightness, on a hotkey, and then leaves it alone. It has no schedule, no location lookup and no account.
+Different monitors rarely look the same at the same setting, so a multi-monitor desk often needs an individual brightness and colour temperature for each screen. Dusk lets you set every monitor on its own, by hotkey, and keeps it there. It has no schedule, no location lookup and no account.
 
 <p align="center">
   <img src="brand/panel.png" alt="The Dusk panel" width="380">
