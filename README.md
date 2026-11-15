@@ -1,48 +1,84 @@
-![Dusk](brand/readme-header.png)
+<p align="center">
+  <img src="brand/readme-header.png" alt="Dusk" width="100%">
+</p>
 
-# Dusk
+<h1 align="center">Dusk</h1>
 
-Colour temperature and brightness for Windows, set per monitor. You choose a value and it stays there.
+<p align="center">
+  <b>Colour temperature and brightness for Windows, per monitor.</b><br>
+  Set it. It stays.
+</p>
 
-Dusk has no schedule, no location lookup and no network access. It is a tray icon, a small panel and a handful of hotkeys.
+<p align="center">
+  <a href="https://github.com/314159DD/dusk/releases/latest"><img src="https://img.shields.io/badge/release-v0.1.0-8FA2FF?style=flat-square" alt="Release"></a>
+  <img src="https://img.shields.io/badge/Windows-10%20%7C%2011-2B3A8C?style=flat-square" alt="Windows 10 and 11">
+  <img src="https://img.shields.io/badge/exe-223%20KB-2B3A8C?style=flat-square" alt="223 KB">
+  <img src="https://img.shields.io/badge/idle%20RAM-2%20MB-2B3A8C?style=flat-square" alt="2 MB idle">
+  <img src="https://img.shields.io/badge/runtime-none-1A1E27?style=flat-square" alt="No runtime">
+  <img src="https://img.shields.io/badge/network-none-1A1E27?style=flat-square" alt="No network access">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-1A1E27?style=flat-square" alt="MIT"></a>
+</p>
 
-## What it does
+<p align="center">
+  <a href="https://github.com/314159DD/dusk/releases/latest"><img src="https://img.shields.io/badge/Download-Dusk.exe-8FA2FF?style=for-the-badge&labelColor=8FA2FF" alt="Download"></a>
+</p>
 
-- One temperature slider (1200 to 9000 K) and one brightness slider (10 to 100 %) for each monitor
-- Values are remembered per physical monitor, so different panels can get different settings
-- Three presets per monitor: press Save, then 1, 2 or 3 to store the current values
-- A blue light filter button per monitor, with its own stored temperature (3400 K by default)
-- A note beside each monitor name: double-click to label a screen
-- A short on-screen readout on the affected monitor after each hotkey
+---
+
+Three different monitors never look the same at night. Dusk gives each one its own warmth and brightness, on a hotkey, and then leaves it alone. It has no schedule, no location lookup and no account.
+
+<p align="center">
+  <img src="brand/panel.png" alt="The Dusk panel" width="380">
+</p>
+
+## Features
+
+- **Per monitor.** One temperature and one brightness slider for every screen, remembered per physical display.
+- **Hotkeys first.** Change the screen under your mouse without opening anything.
+- **Three presets per screen.** Press the disk, pick 1, 2 or 3.
+- **Blue light filter.** One click per screen, with its own stored temperature.
+- **Notes.** Double-click beside a monitor name to label it.
+- **Tiny.** One native exe, about 2 MB of memory while idle, nothing to install, zero network calls.
 
 ## Hotkeys
 
-Hotkeys act on the monitor under the mouse. Add Shift to change all monitors.
-
 | Keys | Action |
 | --- | --- |
-| `Ctrl+Alt+Up` / `Ctrl+Alt+Down` | Brightness up / down |
-| `Ctrl+Alt+Right` / `Ctrl+Alt+Left` | Cooler / warmer |
-| `Ctrl+Alt+Home` | Everything on or off |
+| `Alt` `PageUp` / `PageDown` | Brighter / darker |
+| `Alt` `Shift` `PageUp` / `PageDown` | Cooler / warmer |
+| add `Ctrl` | Apply to all screens |
+| `Ctrl` `Alt` `Home` | Everything on or off |
 
-Keys and step sizes can be changed in `%APPDATA%\Dusk\settings.json`.
+Hotkeys act on the screen under the mouse.
 
-## Build
+## Install
 
-Requires the .NET 8 SDK on Windows.
+1. Download `Dusk.exe` from [Releases](https://github.com/314159DD/dusk/releases/latest).
+2. Run it. It lives in the tray.
+3. Optional: switch on **Start with Windows** in the panel.
+
+Quit other screen tint tools first, they overwrite each other.
+
+<details>
+<summary><b>Build from source</b></summary>
+
+Needs the Visual Studio C++ build tools and a Windows SDK.
 
 ```
-dotnet publish -c Release -r win-x64 -p:SelfContained=false -p:PublishSingleFile=true -p:DebugType=none -o dist
+build.bat
 ```
 
-The result is a single `dist\Dusk.exe` that needs the .NET 8 Desktop Runtime.
+The result is `dist\Dusk.exe`.
+</details>
 
-## Notes
+<details>
+<summary><b>Good to know</b></summary>
 
-- Brightness is software dimming through the display gamma ramp. It darkens the picture, not the backlight.
-- Windows limits how far a gamma ramp may move from neutral. Very warm or very dim values need the registry value `GdiICMGammaRange` (DWORD 256) under `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ICM`, followed by a restart.
-- Other tools that set gamma ramps will fight with Dusk. Run one at a time.
+- Brightness is software dimming. It darkens the picture, not the backlight.
+- Very warm or very dim values need the registry value `GdiICMGammaRange` (DWORD 256) under `HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ICM`, then a restart.
+- Keys and step sizes live in `%APPDATA%\Dusk\settings.json`.
+</details>
 
-## License
+---
 
-MIT
+<p align="center">MIT licensed.</p>
