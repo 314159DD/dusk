@@ -12,6 +12,7 @@ Dusk has no schedule, no location lookup and no network access. It is a tray ico
 - Values are remembered per physical monitor, so different panels can get different settings
 - Three presets per monitor: press Save, then 1, 2 or 3 to store the current values
 - A blue light filter button per monitor, with its own stored temperature (3400 K by default)
+- A note beside each monitor name: double-click to label a screen
 - A short on-screen readout on the affected monitor after each hotkey
 
 ## Hotkeys

@@ -74,6 +74,13 @@ internal sealed class Controller
         Changed?.Invoke();
     }
 
+    public void SetNote(MonitorInfo monitor, string note)
+    {
+        Get(monitor).Note = note.Trim();
+        QueueSave();
+        Changed?.Invoke();
+    }
+
     public bool IsFilterActive(MonitorInfo monitor)
     {
         var setting = Get(monitor);

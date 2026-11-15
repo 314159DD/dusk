@@ -81,7 +81,14 @@ internal sealed class MonitorVm : INotifyPropertyChanged
         }
     }
 
-    public string SaveText => _saveMode ? "Cancel" : "Save";
+    public string Note
+    {
+        get => _controller.Get(_monitor).Note;
+        set => _controller.SetNote(_monitor, value);
+    }
+
+    public bool HasNote => Note.Length > 0;
+    public string NoteText => HasNote ? Note : "Add note";
 
     private void Press(Action store, Action apply)
     {
@@ -200,6 +207,47 @@ public partial class PanelWindow : Window
     private void OnTileClick(object sender, RoutedEventArgs e)
     {
         if (sender is FrameworkElement { DataContext: TileVm tile }) tile.Press();
+    }
+
+    private void OnNoteMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (e.ClickCount != 2 || sender is not FrameworkElement { DataContext: MonitorVm monitor, Parent: System.Windows.Controls.Panel host }) return;
+        var box = host.Children.OfType<System.Windows.Controls.TextBox>().First();
+        box.Text = monitor.Note;
+        box.Visibility = Visibility.Visible;
+        ((UIElement)sender).Visibility = Visibility.Collapsed;
+        box.Focus();
+        box.SelectAll();
+        e.Handled = true;
+    }
+
+    private void OnNoteKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.TextBox box) return;
+        if (e.Key == System.Windows.Input.Key.Enter)
+        {
+            EndNoteEdit(box, commit: true);
+            e.Handled = true;
+        }
+        else if (e.Key == System.Windows.Input.Key.Escape)
+        {
+            EndNoteEdit(box, commit: false);
+            e.Handled = true;
+        }
+    }
+
+    private void OnNoteLostFocus(object sender, RoutedEventArgs e)
+    {
+        if (sender is System.Windows.Controls.TextBox box) EndNoteEdit(box, commit: true);
+    }
+
+    private static void EndNoteEdit(System.Windows.Controls.TextBox box, bool commit)
+    {
+        if (box.Visibility != Visibility.Visible) return;
+        box.Visibility = Visibility.Collapsed;
+        if (box.Parent is System.Windows.Controls.Panel host)
+            foreach (var label in host.Children.OfType<System.Windows.Controls.TextBlock>()) label.Visibility = Visibility.Visible;
+        if (commit && box.DataContext is MonitorVm monitor) monitor.Note = box.Text;
     }
 
     private void OnSaveClick(object sender, RoutedEventArgs e)

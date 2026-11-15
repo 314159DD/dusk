@@ -17,11 +17,13 @@ internal sealed class MonitorSetting
     public int Brightness { get; set; } = 100;
     public int FilterKelvin { get; set; } = 3400;
     public int FilterReturnKelvin { get; set; } = 6500;
+    public string Note { get; set; } = "";
     public List<Preset> Presets { get; set; } = new();
 
     public void Normalize()
     {
         Presets ??= new List<Preset>();
+        Note ??= "";
         var defaults = new[]
         {
             new Preset { Kelvin = 6500, Brightness = 100 },
