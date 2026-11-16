@@ -698,7 +698,7 @@ static LRESULT CALLBACK panelProc(HWND h, UINT m, WPARAM w, LPARAM l)
     case WM_ERASEBKGND: return 1;
     case WM_ACTIVATE:
         if (LOWORD(w) == WA_INACTIVE) {
-            if (P.edit && (HWND)l == P.edit) return 0;
+            if (l && GetWindow((HWND)l, GW_OWNER) == h) return 0;
             uiClosePanel();
         }
         return 0;
@@ -763,7 +763,7 @@ static LRESULT CALLBACK panelProc(HWND h, UINT m, WPARAM w, LPARAM l)
             return 0;
         }
         if (hit.s.kind == K_NOTE) {
-            if (m == WM_LBUTTONDBLCLK) beginEdit(hit.s.mon, hit.x, hit.y, hit.w, hit.h);
+            beginEdit(hit.s.mon, hit.x, hit.y, hit.w, hit.h);
             return 0;
         }
         SetCapture(h);
