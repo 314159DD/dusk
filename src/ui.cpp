@@ -11,7 +11,7 @@ static const DWORD C_STRONG = 0x24FFFFFF, C_WELL = 0x0FFFFFFF, C_GLOW = 0xFF8FA2
 static const DWORD C_GLASS = 0xA31A1E27, C_CHROME = 0xC70E1116, C_WARN = 0xFFF0B26B, C_SURF = 0xFF1A1E27;
 static const DWORD C_SECOND = 0xB81A1E27, C_SWITCHOFF = 0x24EEF0F4, C_RING = 0x33000000;
 
-enum { K_NONE = 0, K_ENABLED, K_TILE, K_SAVE, K_FILTER, K_NOTE, K_KSL, K_BSL, K_AUTO, K_QUIT, K_RESET };
+enum { K_NONE = 0, K_ENABLED, K_TILE, K_SAVE, K_FILTER, K_NOTE, K_KSL, K_BSL, K_AUTO, K_QUIT, K_RESET, K_GRIP };
 
 #define WM_ENDEDIT (WM_APP + 2)
 #define WM_CHECKACTIVE (WM_APP + 3)
@@ -237,6 +237,9 @@ static struct PanelState {
     Sel hover, press;
     bool drag;
     Sel dragSel;
+    bool move;
+    int moveMon;
+    float moveY0, moveDy;
     bool tracking;
     bool autostart;
     DWORD lastHidden;
@@ -382,7 +385,9 @@ static void drawSlider(Graphics& g, float x, float y, float w, float frac, bool 
 static void drawCard(Graphics& g, int mi, float y0)
 {
     const float x = 36, cx = 61, cw = 302;
-    fillRR(g, C_GLASS, x, y0, 352, 233, 22);
+    bool lifted = P.move && P.moveMon == mi;
+    if (lifted) fillRR(g, C_SURF, x, y0, 352, 233, 22);
+    else fillRR(g, C_GLASS, x, y0, 352, 233, 22);
     edgeRR(g, x, y0, 352, 233, 22);
 
     MonSetting* st = ctlGet(mi);
@@ -390,6 +395,13 @@ static void drawCard(Graphics& g, int mi, float y0)
     float ry = y0 + 25;
 
     txt(g, m.name, P.F.n14, C_INK, cx, ry, 200, 19, StringAlignmentNear);
+    if (g_nmon > 1) {
+        SolidBrush gb((Color)((lifted || hov(K_GRIP, mi, 0)) ? C_INK : 0x738E95A3));
+        for (int c = 0; c < 2; c++)
+            for (int r = 0; r < 3; r++)
+                g.FillEllipse(&gb, 45.0f + c * 5.0f, ry + 4.0f + r * 5.0f, 2.0f, 2.0f);
+        addHit(38, ry - 6, 20, 31, K_GRIP, mi, 0);
+    }
     float nameW = tw(m.name, P.F.n14);
     wchar_t detail[48];
     wsprintfW(detail, L"%d \x00D7 %d", m.bounds.right - m.bounds.left, m.bounds.bottom - m.bounds.top);
@@ -475,6 +487,14 @@ static void drawCapsule(Graphics& g, float x, float y, float w, float h, const w
     addHit(x, y, w, h, kind, 0, 0);
 }
 
+static int moveTarget()
+{
+    int to = (int)((P.moveMon * 245.0f + P.moveDy + 122.5f) / 245.0f);
+    if (P.moveMon * 245.0f + P.moveDy + 122.5f < 0) to = 0;
+    if (to > g_nmon - 1) to = g_nmon - 1;
+    return to;
+}
+
 static void panelRender()
 {
     CopyMemory(P.sf.bits, P.bg, (size_t)P.W * P.H * 4);
@@ -489,7 +509,23 @@ static void panelRender()
     drawSwitch(g, 338, 38, g_set.enabled, K_ENABLED);
     txt(g, g_set.enabled ? L"On" : L"Paused", P.F.r12, C_MUTED, 200, 38, 128, 28, StringAlignmentFar);
 
-    for (int i = 0; i < g_nmon; i++) drawCard(g, i, 82.0f + i * 245.0f);
+    if (P.move && P.moveMon < g_nmon) {
+        int to = moveTarget();
+        for (int i = 0; i < g_nmon; i++) {
+            if (i == P.moveMon) continue;
+            int p = i;
+            if (i > P.moveMon && i <= to) p = i - 1;
+            else if (i < P.moveMon && i >= to) p = i + 1;
+            drawCard(g, i, 82.0f + p * 245.0f);
+        }
+        float dy = 82.0f + P.moveMon * 245.0f + P.moveDy;
+        float top = 82.0f, bot = 82.0f + (g_nmon - 1) * 245.0f;
+        if (dy < top) dy = top;
+        if (dy > bot) dy = bot;
+        drawCard(g, P.moveMon, dy);
+    } else {
+        for (int i = 0; i < g_nmon; i++) drawCard(g, i, 82.0f + i * 245.0f);
+    }
 
     float y = 70.0f + g_nmon * 245.0f + 16;
     for (int i = 0; i < P.nhint; i++) {
@@ -529,6 +565,7 @@ static bool panelAlloc(float s)
     ZeroMemory(P.save, sizeof(P.save));
     P.hover.kind = P.press.kind = P.dragSel.kind = K_NONE;
     P.drag = false;
+    P.move = false;
     fontsInit(P.F);
     panelLayoutText();
     P.W = (int)ceilf(424 * s);
@@ -739,6 +776,7 @@ static LRESULT CALLBACK panelProc(HWND h, UINT m, WPARAM w, LPARAM l)
         }
         float lx = (short)LOWORD(l) / P.s, ly = (short)HIWORD(l) / P.s;
         if (P.drag) { sliderSet(P.dragSel, lx); return 0; }
+        if (P.move) { P.moveDy = ly - P.moveY0; redraw(); return 0; }
         int i = hitAt(lx, ly);
         Sel n = { K_NONE, 0, 0 };
         if (i >= 0) n = hits[i].s;
@@ -762,6 +800,16 @@ static LRESULT CALLBACK panelProc(HWND h, UINT m, WPARAM w, LPARAM l)
             sliderSet(hit.s, lx);
             return 0;
         }
+        if (hit.s.kind == K_GRIP) {
+            if (P.edit) endEdit(true, false);
+            SetCapture(h);
+            P.move = true;
+            P.moveMon = hit.s.mon;
+            P.moveY0 = ly;
+            P.moveDy = 0;
+            redraw();
+            return 0;
+        }
         if (hit.s.kind == K_NOTE) {
             beginEdit(hit.s.mon, hit.x, hit.y, hit.w, hit.h);
             return 0;
@@ -778,6 +826,20 @@ static LRESULT CALLBACK panelProc(HWND h, UINT m, WPARAM w, LPARAM l)
             redraw();
             return 0;
         }
+        if (P.move) {
+            int from = P.moveMon, to = moveTarget();
+            P.move = false;
+            ReleaseCapture();
+            if (to != from) {
+                bool sv = P.save[from];
+                int d = to > from ? 1 : -1;
+                for (int k = from; k != to; k += d) P.save[k] = P.save[k + d];
+                P.save[to] = sv;
+                P.hover.kind = K_NONE;
+                ctlMoveMonitor(from, to);
+            } else redraw();
+            return 0;
+        }
         if (P.press.kind != K_NONE) {
             Sel s = P.press;
             P.press.kind = K_NONE;
@@ -789,6 +851,7 @@ static LRESULT CALLBACK panelProc(HWND h, UINT m, WPARAM w, LPARAM l)
     }
     case WM_CAPTURECHANGED:
         if (P.drag) { P.drag = false; redraw(); }
+        if (P.move) { P.move = false; redraw(); }
         P.press.kind = K_NONE;
         return 0;
     case WM_SETCURSOR:
@@ -798,7 +861,8 @@ static LRESULT CALLBACK panelProc(HWND h, UINT m, WPARAM w, LPARAM l)
             ScreenToClient(h, &pt);
             int i = hitAt(pt.x / P.s, pt.y / P.s);
             LPCWSTR c = IDC_ARROW;
-            if (i >= 0) c = hits[i].s.kind == K_NOTE ? IDC_IBEAM : IDC_HAND;
+            if (i >= 0) c = hits[i].s.kind == K_NOTE ? IDC_IBEAM : hits[i].s.kind == K_GRIP ? IDC_SIZENS : IDC_HAND;
+            if (P.move) c = IDC_SIZENS;
             SetCursor(LoadCursorW(NULL, c));
             return TRUE;
         }

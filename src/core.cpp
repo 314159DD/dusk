@@ -39,6 +39,7 @@ static void monDefaults(MonSetting* m)
     m->brightness = 100;
     m->filterKelvin = 3400;
     m->filterReturn = 6500;
+    m->order = -1;
 }
 
 static void monNormalize(MonSetting* m)
@@ -238,6 +239,7 @@ static void monField(JP& j, const wchar_t* key, void* ctx)
     else if (lstrcmpW(key, L"Brightness") == 0) getInt(j, &m->brightness);
     else if (lstrcmpW(key, L"FilterKelvin") == 0) getInt(j, &m->filterKelvin);
     else if (lstrcmpW(key, L"FilterReturnKelvin") == 0) getInt(j, &m->filterReturn);
+    else if (lstrcmpW(key, L"Order") == 0) getInt(j, &m->order);
     else if (lstrcmpW(key, L"Note") == 0) getStr(j, m->note, 128);
     else if (lstrcmpW(key, L"Presets") == 0) {
         ws(j);
@@ -450,6 +452,7 @@ void settingsSave()
             wkeyint(w, 3, "Brightness", m.brightness, false);
             wkeyint(w, 3, "FilterKelvin", m.filterKelvin, false);
             wkeyint(w, 3, "FilterReturnKelvin", m.filterReturn, false);
+            wkeyint(w, 3, "Order", m.order, false);
             windent(w, 3);
             wput(w, "\"Note\": ");
             wstr(w, m.note);
@@ -575,6 +578,13 @@ static BOOL CALLBACK enumProc(HMONITOR h, HDC, LPRECT, LPARAM)
     return TRUE;
 }
 
+static int orderKey(int mi)
+{
+    for (int i = 0; i < g_set.nmon; i++)
+        if (lstrcmpW(g_set.mon[i].id, g_mon[mi].id) == 0 && g_set.mon[i].order >= 0) return g_set.mon[i].order;
+    return 1000;
+}
+
 void monitorsRefresh()
 {
     g_nmon = 0;
@@ -585,6 +595,14 @@ void monitorsRefresh()
             const RECT& b = g_mon[j].bounds;
             bool swap = a.left > b.left || (a.left == b.left && a.top > b.top);
             if (!swap) break;
+            Monitor t = g_mon[j - 1];
+            g_mon[j - 1] = g_mon[j];
+            g_mon[j] = t;
+        }
+    }
+    for (int i = 1; i < g_nmon; i++) {
+        for (int j = i; j > 0; j--) {
+            if (orderKey(j - 1) <= orderKey(j)) break;
             Monitor t = g_mon[j - 1];
             g_mon[j - 1] = g_mon[j];
             g_mon[j] = t;
@@ -735,6 +753,18 @@ void ctlSavePreset(int mi, int index)
     MonSetting* s = ctlGet(mi);
     s->presets[index].kelvin = s->kelvin;
     s->presets[index].brightness = s->brightness;
+    queueSave();
+    uiChanged();
+}
+
+void ctlMoveMonitor(int from, int to)
+{
+    if (from < 0 || to < 0 || from >= g_nmon || to >= g_nmon || from == to) return;
+    Monitor t = g_mon[from];
+    int d = to > from ? 1 : -1;
+    for (int i = from; i != to; i += d) g_mon[i] = g_mon[i + d];
+    g_mon[to] = t;
+    for (int i = 0; i < g_nmon; i++) ctlGet(i)->order = i;
     queueSave();
     uiChanged();
 }

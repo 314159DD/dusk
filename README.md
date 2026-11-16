@@ -38,6 +38,7 @@ Different monitors rarely look the same at the same setting, so a multi-monitor 
 - **Blue light filter.** One click per screen, with its own stored temperature.
 - **Quiet readout.** A small popup in the top right corner of the changed screen shows the new values for a second, then goes away.
 - **Notes.** Click beside a monitor name to label it.
+- **Your order.** Drag a screen by its grip to rearrange the list.
 - **Tiny.** One native exe, about 2 MB of memory while idle, nothing to install, zero network calls.
 
 ## Hotkeys

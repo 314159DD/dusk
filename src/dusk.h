@@ -13,7 +13,7 @@ struct Preset { int kelvin; int brightness; };
 
 struct MonSetting {
     wchar_t id[200];
-    int kelvin, brightness, filterKelvin, filterReturn;
+    int kelvin, brightness, filterKelvin, filterReturn, order;
     wchar_t note[128];
     int np;
     Preset presets[8];
@@ -63,6 +63,7 @@ void ctlResetAll();
 void ctlApplyPreset(int mi, int index);
 void ctlSavePreset(int mi, int index);
 void ctlSetNote(int mi, const wchar_t* note);
+void ctlMoveMonitor(int from, int to);
 bool ctlPresetActive(int mi, int index);
 bool ctlFilterActive(int mi);
 void ctlToggleFilter(int mi);
